@@ -36,12 +36,12 @@ const Navbar = () => {
                 ></path>
               </svg>
             </div>
-            Lander
+            <Link to="/">Lander</Link>
           </div>
           <div className="flex mt-4 sm:mt-0">
-            <a className="px-4" href="#features">
-              Features
-            </a>
+            <Link className="px-4" to="/products">
+              Products
+            </Link>
             <a className="px-4" href="#services">
               Services
             </a>
