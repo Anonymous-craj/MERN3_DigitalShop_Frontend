@@ -1,29 +1,34 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { Status } from "../globals/types/type";
 import type { IProduct, IProducts } from "../pages/product/types";
-import type { AppDispatch } from "./store";
+import type { AppDispatch, RootState } from "./store";
 import axios from "axios";
 
 const initialState: IProducts = {
   products: [],
   status: Status.LOADING,
+  product: null,
 };
 
 const productSlice = createSlice({
   name: "product",
   initialState,
   reducers: {
-    setProduct(state: IProducts, action: PayloadAction<IProduct[]>) {
+    setProducts(state: IProducts, action: PayloadAction<IProduct[]>) {
       state.products = action.payload;
     },
 
     setStatus(state: IProducts, action: PayloadAction<Status>) {
       state.status = action.payload;
     },
+
+    setProduct(state: IProducts, action: PayloadAction<IProduct>) {
+      state.product = action.payload;
+    },
   },
 });
 
-export const { setProduct, setStatus } = productSlice.actions;
+export const { setProducts, setStatus, setProduct } = productSlice.actions;
 export default productSlice.reducer;
 
 export function fetchProducts() {
@@ -32,13 +37,46 @@ export function fetchProducts() {
       const response = await axios.get("http://localhost:3000/api/product");
       if (response.status === 200) {
         dispatch(setStatus(Status.SUCCESS));
-        dispatch(setProduct(response.data.data));
+        dispatch(setProducts(response.data.data));
       } else {
         dispatch(setStatus(Status.ERROR));
       }
     } catch (error) {
       console.log(error);
       dispatch(setStatus(Status.ERROR));
+    }
+  };
+}
+
+export function fetchProduct(id: string) {
+  return async function fetchProductThunk(
+    dispatch: AppDispatch,
+    getState: () => RootState
+  ) {
+    const store = getState();
+    const productExists = store.products.products.find(
+      (product: IProduct) => product.id === id
+    );
+    if (productExists) {
+      dispatch(setProduct(productExists));
+      dispatch(setStatus(Status.SUCCESS));
+    } else {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/api/product/" + id
+        );
+        if (response.status === 200) {
+          const data =
+            response.data.data.length > 0 ? response.data.data[0] : null;
+          dispatch(setStatus(Status.SUCCESS));
+          dispatch(setProduct(data));
+        } else {
+          dispatch(setStatus(Status.ERROR));
+        }
+      } catch (error) {
+        console.log(error);
+        dispatch(setStatus(Status.ERROR));
+      }
     }
   };
 }
