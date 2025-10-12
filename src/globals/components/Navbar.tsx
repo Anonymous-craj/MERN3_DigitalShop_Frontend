@@ -1,10 +1,13 @@
 import { Link } from "react-router-dom";
-import { useAppSelector } from "../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { useEffect, useState } from "react";
+import { fetchCartItems } from "../../store/cartSlice";
 
 const Navbar = () => {
   const reduxToken = useAppSelector((store) => store.auth.user.token);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const dispatch = useAppDispatch();
+  const { items } = useAppSelector((store) => store.cart);
 
   useEffect(() => {
     // Check both Redux and localStorage whenever Redux token changes
@@ -12,9 +15,12 @@ const Navbar = () => {
 
     if (reduxToken || localStorageToken) {
       setIsLoggedIn(true);
+      if (isLoggedIn) {
+        dispatch(fetchCartItems());
+      }
     }
-  }, [reduxToken]);
-  console.log(isLoggedIn);
+  }, [reduxToken, isLoggedIn]);
+
   return (
     <>
       <header className="sticky top-0 bg-white shadow">
@@ -54,14 +60,21 @@ const Navbar = () => {
           </div>
           <div className="hidden md:block">
             {isLoggedIn ? (
-              <Link to="/logout">
-                <button
-                  type="button"
-                  className="mr-5 py-3 px-8 text-sm bg-teal-500 hover:bg-teal-600 rounded text-white cursor-pointer"
-                >
-                  Logout
-                </button>
-              </Link>
+              <>
+                <span className="mr-[20px]">
+                  <Link to="/my-cart">
+                    Cart <sup>{items.length > 0 ? items.length : 0}</sup>
+                  </Link>
+                </span>
+                <Link to="/logout">
+                  <button
+                    type="button"
+                    className="mr-5 py-3 px-8 text-sm bg-teal-500 hover:bg-teal-600 rounded text-white cursor-pointer"
+                  >
+                    Logout
+                  </button>
+                </Link>
+              </>
             ) : (
               <>
                 <Link to="/register">

@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { fetchProduct } from "../../store/productSlice";
 import { useParams } from "react-router-dom";
 import { Status } from "../../globals/types/type";
+import { addToCart } from "../../store/cartSlice";
 
 const SingleProduct = () => {
   const { product, status } = useAppSelector((store) => store.products);
@@ -14,6 +15,12 @@ const SingleProduct = () => {
       dispatch(fetchProduct(id));
     }
   }, []);
+
+  const handleAddToCart = () => {
+    if (id) {
+      dispatch(addToCart(id));
+    }
+  };
 
   // Loader
   if (status === Status.LOADING) {
@@ -85,7 +92,10 @@ const SingleProduct = () => {
               {product?.productDescription}
             </p>
             <div className="h-[88px] mt-6 py-[18px] bg-white shadow-[0px_1px_0px_0px_rgba(229,229,229,1.00)] border border-white justify-center items-center gap-3 flex mr-40">
-              <button className="h-[51px] px-20 py-4 bg-[#00b206] rounded-[43px] justify-center items-center gap-4 flex">
+              <button
+                className="h-[51px] px-20 py-4 bg-[#00b206] rounded-[43px] justify-center items-center gap-4 flex"
+                onClick={handleAddToCart}
+              >
                 <span className="text-white text-base font-semibold leading-tight">
                   Add to Cart
                 </span>
