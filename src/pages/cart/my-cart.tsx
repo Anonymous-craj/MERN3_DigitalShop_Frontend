@@ -1,9 +1,27 @@
 import { Link } from "react-router-dom";
 import Navbar from "../../globals/components/Navbar";
-import { useAppSelector } from "../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import {
+  handleDeleteCartItem,
+  handleUpdateCartItem,
+} from "../../store/cartSlice";
 
 const MyCart = () => {
   const { items } = useAppSelector((store) => store.cart);
+  const dispatch = useAppDispatch();
+
+  const handleUpdate = (productId: string, quantity: number) => {
+    dispatch(handleUpdateCartItem(productId, quantity));
+  };
+
+  const handleDelete = (productId: string) => {
+    dispatch(handleDeleteCartItem(productId));
+  };
+
+  const subTotal = items.reduce(
+    (total, item) => item.Product.productPrice * item.quantity + total,
+    0
+  );
   return (
     <>
       <Navbar />
@@ -19,7 +37,7 @@ const MyCart = () => {
                   <th className="text-left px-2 py-2">Product</th>
                   <th className="px-2 py-2">price</th>
                   <th className="px-2 py-2">Quantity</th>
-                  <th className="px-2 py-2">Subtotal</th>
+                  <th className="px-2 py-2">Total</th>
                   <th className="w-7 px-2 py-2" />
                 </tr>
               </thead>
@@ -47,6 +65,9 @@ const MyCart = () => {
                             viewBox="0 0 14 15"
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"
+                            onClick={() =>
+                              handleUpdate(item.Product.id, item.quantity - 1)
+                            }
                           >
                             <path
                               d="M2.33398 7.5H11.6673"
@@ -66,6 +87,9 @@ const MyCart = () => {
                             viewBox="0 0 14 15"
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"
+                            onClick={() =>
+                              handleUpdate(item.Product.id, item.quantity + 1)
+                            }
                           >
                             <path
                               d="M2.33398 7.49998H11.6673M7.00065 2.83331V12.1666V2.83331Z"
@@ -76,7 +100,9 @@ const MyCart = () => {
                             />
                           </svg>
                         </td>
-                        <td className="px-2 py-2">$70.00</td>
+                        <td className="px-2 py-2">
+                          Rs.{item.Product.productPrice * item.quantity}
+                        </td>
                         <td className="px-2 py-2">
                           <svg
                             width={24}
@@ -85,6 +111,7 @@ const MyCart = () => {
                             viewBox="0 0 24 25"
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"
+                            onClick={() => handleDelete(item.Product.id)}
                           >
                             <path
                               d="M12 23.5C18.0748 23.5 23 18.5748 23 12.5C23 6.42525 18.0748 1.5 12 1.5C5.92525 1.5 1 6.42525 1 12.5C1 18.5748 5.92525 23.5 12 23.5Z"
@@ -128,20 +155,12 @@ const MyCart = () => {
             <h2 className="text-[#191919] mb-2 text-xl font-medium leading-[30px]">
               Cart Total
             </h2>
-            <div className="w-[376px] py-3 justify-between items-center flex">
-              <span className="text-[#4c4c4c] text-base font-normal leading-normal">
-                Total:
-              </span>
-              <span className="text-[#191919] text-base font-semibold leading-tight">
-                $84.00
-              </span>
-            </div>
             <div className="w-[376px] py-3 shadow-[0px_1px_0px_0px_rgba(229,229,229,1.00)] justify-between items-center flex">
               <span className="text-[#4c4c4c] text-sm font-normal leading-[21px]">
                 Shipping:
               </span>
               <span className="text-[#191919] text-sm font-medium leading-[21px]">
-                Free
+                Rs. 100
               </span>
             </div>
             <div className="w-[376px] py-3 shadow-[0px_1px_0px_0px_rgba(229,229,229,1.00)] justify-between items-center flex">
@@ -149,7 +168,7 @@ const MyCart = () => {
                 Subtotal:
               </span>
               <span className="text-[#191919] text-sm font-medium leading-[21px]">
-                $84.00
+                {subTotal}
               </span>
             </div>
             <button className="w-[376px] text-white mt-5 px-10 py-4 bg-[#00b206] rounded-[44px] gap-4 text-base font-semibold leading-tight">
