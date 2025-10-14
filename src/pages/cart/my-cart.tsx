@@ -171,9 +171,11 @@ const MyCart = () => {
                 {subTotal}
               </span>
             </div>
-            <button className="w-[376px] text-white mt-5 px-10 py-4 bg-[#00b206] rounded-[44px] gap-4 text-base font-semibold leading-tight">
-              Proceed to checkout
-            </button>
+            <Link to="/my-checkout">
+              <button className="w-[376px] text-white mt-5 px-10 py-4 bg-[#00b206] rounded-[44px] gap-4 text-base font-semibold leading-tight">
+                Proceed to checkout
+              </button>
+            </Link>
           </div>
         </div>
       </section>
