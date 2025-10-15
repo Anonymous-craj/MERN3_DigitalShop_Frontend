@@ -2,7 +2,7 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { Status } from "../globals/types/type";
 import type { IProduct, IProducts } from "../pages/product/types";
 import type { AppDispatch, RootState } from "./store";
-import axios from "axios";
+import { API } from "../http/apiType";
 
 const initialState: IProducts = {
   products: [],
@@ -34,7 +34,7 @@ export default productSlice.reducer;
 export function fetchProducts() {
   return async function fetchProductsThunk(dispatch: AppDispatch) {
     try {
-      const response = await axios.get("http://localhost:3000/api/product");
+      const response = await API.get("/product");
       if (response.status === 200) {
         dispatch(setStatus(Status.SUCCESS));
         dispatch(setProducts(response.data.data));
@@ -62,9 +62,7 @@ export function fetchProduct(id: string) {
       dispatch(setStatus(Status.SUCCESS));
     } else {
       try {
-        const response = await axios.get(
-          "http://localhost:3000/api/product/" + id
-        );
+        const response = await API.get("/product/" + id);
         if (response.status === 200) {
           const data =
             response.data.data.length > 0 ? response.data.data[0] : null;

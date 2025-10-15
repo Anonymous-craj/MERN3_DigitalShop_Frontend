@@ -6,7 +6,7 @@ import {
   type IUser,
 } from "../globals/types/type";
 import type { AppDispatch } from "./store";
-import axios from "axios";
+import { API, APIWITHTOKEN } from "../http/apiType";
 
 const initialState: IAuthState = {
   user: {
@@ -40,7 +40,7 @@ export default authSlice.reducer;
 export function registerUser(data: IUser) {
   return async function registerUserThunk(dispatch: AppDispatch) {
     try {
-      const response = await axios.post("http://localhost:3000/register", data);
+      const response = await API.post("/register", data);
       console.log(response);
       if (response.status === 201) {
         dispatch(setStatus(Status.SUCCESS));
@@ -60,7 +60,7 @@ export function registerUser(data: IUser) {
 export function loginUser(data: ILogin) {
   return async function loginUserThunk(dispatch: AppDispatch) {
     try {
-      const response = await axios.post("http://localhost:3000/login", data);
+      const response = await APIWITHTOKEN.post("/login", data);
       console.log(response);
       if (response.status === 200) {
         dispatch(setStatus(Status.SUCCESS));

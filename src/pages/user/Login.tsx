@@ -1,12 +1,13 @@
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import type { ILogin } from "../../globals/types/type";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { loginUser } from "../../store/authSlice";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((store) => store.auth);
+  const navigate = useNavigate();
+  const { user, status } = useAppSelector((store) => store.auth);
   const [data, setData] = useState<ILogin>({
     email: null,
     password: null,
@@ -19,6 +20,14 @@ const Login = () => {
       [name]: value,
     });
   };
+
+  // Redirect the user if login is successful
+  useEffect(() => {
+    if (status === "success" && user) {
+      // Redirect to the homepage ("/") after successful login
+      navigate("/");
+    }
+  }, [status, user, navigate]);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

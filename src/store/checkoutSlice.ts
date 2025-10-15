@@ -33,17 +33,24 @@ export function orderItem(data: IData) {
   return async function orderItemThunk(dispatch: AppDispatch) {
     try {
       const response = await APIWITHTOKEN.post("/order", data);
-      if (response.status === 200) {
+
+      console.log("Response data from API:", response.data); // Log to inspect the structure
+
+      if (response.status === 201) {
         dispatch(setItems(response.data.data));
         dispatch(setStatus(Status.SUCCESS));
+
+        // Dispatch the Khalti URL to Redux store
         if (response.data.url) {
-          setKhaltiUrl(response.data.url);
+          dispatch(setKhaltiUrl(response.data.url)); // Correct way to dispatch the URL to Redux
+          console.log("Redirecting to Khalti URL:", response.data.url);
+          window.location.href = response.data.url;
         }
       } else {
         dispatch(setStatus(Status.ERROR));
       }
     } catch (error) {
-      console.log(error);
+      console.error("Error during order creation:", error);
       dispatch(setStatus(Status.ERROR));
     }
   };

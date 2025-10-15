@@ -24,11 +24,11 @@ const Card: React.FC<ICardProps> = ({ product }) => {
             </p>
             <div className="flex items-center">
               <p className="text-lg font-semibold text-black cursor-auto my-3">
-                ${product?.productPrice}
+                Rs.{product?.productPrice}
               </p>
               <del>
                 <p className="text-sm text-gray-600 cursor-auto ml-2">
-                  ${product?.discount}
+                  Rs.{product?.discount}
                 </p>
               </del>
               <div className="ml-auto">

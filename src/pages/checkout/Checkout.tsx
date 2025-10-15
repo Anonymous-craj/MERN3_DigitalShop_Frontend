@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import Navbar from "../../globals/components/Navbar";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { PaymentMethod, type IData } from "./types";
@@ -6,6 +6,8 @@ import { orderItem } from "../../store/checkoutSlice";
 
 const Checkout = () => {
   const { items } = useAppSelector((store) => store.cart);
+  const { khaltiUrl, status } = useAppSelector((store) => store.orders);
+  console.log("khaltiUrl from Redux:", khaltiUrl);
   const total = items.reduce(
     (total, item) => item.Product.productPrice * item.quantity + total,
     0
@@ -27,6 +29,26 @@ const Checkout = () => {
     products: [],
   });
 
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
+    PaymentMethod.Cod
+  );
+
+  useEffect(() => {
+    if (khaltiUrl) {
+      console.log("Redirecting to Khalti URL:", khaltiUrl);
+      window.location.href = khaltiUrl; // Navigate to the Khalti URL
+      return;
+    }
+  }, [khaltiUrl, status]);
+
+  const handlePaymentMethod = (paymentData: PaymentMethod) => {
+    setPaymentMethod(paymentData);
+    setData({
+      ...data,
+      paymentMethod: paymentData,
+    });
+  };
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setData({
@@ -35,7 +57,7 @@ const Checkout = () => {
     });
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (
       !data.addressLine ||
@@ -62,8 +84,9 @@ const Checkout = () => {
       products: productData,
       totalAmount: total,
     };
-    dispatch(orderItem(finalData));
+    await dispatch(orderItem(finalData));
   };
+
   return (
     <>
       <Navbar />
@@ -233,99 +256,53 @@ const Checkout = () => {
                   </div>
                 </div>
               </div>
-              <div className="mt-8">
-                <button
-                  type="submit"
-                  className="rounded-md px-4 py-2.5 w-full text-sm font-medium tracking-wide bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+
+              <div className="mt-4">
+                <label
+                  htmlFor="paymentMethod"
+                  className="flex text-sm text-slate-900 font-medium mb-2"
                 >
-                  Complete Purchase
-                </button>
+                  Payment Method:
+                </label>
+                <select
+                  name=""
+                  id="paymentMethod"
+                  className=" cursor-pointer"
+                  onChange={(e) =>
+                    handlePaymentMethod(e.target.value as PaymentMethod)
+                  }
+                >
+                  <option value={PaymentMethod.Cod}>COD</option>
+                  <option value={PaymentMethod.Khalti}>Khalti</option>
+                  <option value={PaymentMethod.Esewa}>Esewa</option>
+                </select>
               </div>
-              <div className="mt-12">
-                <h2 className="text-xl text-slate-900 font-semibold mb-6">
-                  Payment
-                </h2>
-                <div className="grid gap-4 lg:grid-cols-2">
-                  <div className="bg-gray-100 p-4 rounded-md border border-gray-300 max-w-sm">
-                    <div>
-                      <div className="flex items-center">
-                        <input
-                          type="radio"
-                          name="method"
-                          className="w-5 h-5 cursor-pointer"
-                          id="card"
-                          defaultChecked
-                        />
-                        <label
-                          htmlFor="card"
-                          className="ml-4 flex gap-2 cursor-pointer"
-                        >
-                          <img
-                            src="https://readymadeui.com/images/visa.webp"
-                            className="w-12"
-                            alt="card1"
-                          />
-                          <img
-                            src="https://readymadeui.com/images/american-express.webp"
-                            className="w-12"
-                            alt="card2"
-                          />
-                          <img
-                            src="https://readymadeui.com/images/master.webp"
-                            className="w-12"
-                            alt="card3"
-                          />
-                        </label>
-                      </div>
-                    </div>
-                    <p className="mt-4 text-sm text-slate-500 font-medium">
-                      Pay with your debit or credit card
-                    </p>
-                  </div>
-                  <div className="bg-gray-100 p-4 rounded-md border border-gray-300 max-w-sm">
-                    <div>
-                      <div className="flex items-center">
-                        <input
-                          type="radio"
-                          name="method"
-                          className="w-5 h-5 cursor-pointer"
-                          id="paypal"
-                        />
-                        <label
-                          htmlFor="paypal"
-                          className="ml-4 flex gap-2 cursor-pointer"
-                        >
-                          <img
-                            src="https://readymadeui.com/images/paypal.webp"
-                            className="w-20"
-                            alt="paypalCard"
-                          />
-                        </label>
-                      </div>
-                    </div>
-                    <p className="mt-4 text-sm text-slate-500 font-medium">
-                      Pay with your paypal account
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-12 max-w-md">
-                <p className="text-slate-900 text-sm font-medium mb-2">
-                  Do you have a promo code?
-                </p>
-                <div className="flex gap-4">
-                  <input
-                    type="email"
-                    placeholder="Promo code"
-                    className="px-4 py-2.5 bg-white border border-gray-400 text-slate-900 w-full text-sm rounded-md focus:outline-blue-600"
-                  />
+              <div className="mt-8">
+                {paymentMethod === PaymentMethod.Cod && (
                   <button
-                    type="button"
-                    className="flex items-center justify-center font-medium tracking-wide bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded-md text-sm text-white cursor-pointer"
+                    type="submit"
+                    className="rounded-md px-4 py-2.5 w-full text-sm font-medium tracking-wide bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
                   >
-                    Apply
+                    Pay on COD
                   </button>
-                </div>
+                )}
+                {paymentMethod === PaymentMethod.Khalti && (
+                  <button
+                    type="submit"
+                    className="rounded-md px-4 py-2.5 w-full text-sm font-medium tracking-wide bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+                  >
+                    Pay with Khalti
+                  </button>
+                )}
+
+                {paymentMethod === PaymentMethod.Esewa && (
+                  <button
+                    type="submit"
+                    className="rounded-md px-4 py-2.5 w-full text-sm font-medium tracking-wide bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+                  >
+                    Pay with Esewa
+                  </button>
+                )}
               </div>
             </form>
           </div>
