@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Navbar from "../../globals/components/Navbar";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { fetchMyOrders } from "../../store/checkoutSlice";
+import { Link } from "react-router-dom";
 
 const MyOrder = () => {
   const dispatch = useAppDispatch();
@@ -86,9 +87,11 @@ const MyOrder = () => {
                   newItems.map((item) => {
                     return (
                       <tr className="hover:bg-gray-50">
-                        <td className="px-6 py-4 text-gray-700 font-medium">
-                          {item?.id}
-                        </td>
+                        <Link to={`/my-orders/${item.id}`}>
+                          <td className="px-6 py-4 text-gray-700 font-medium">
+                            {item?.id}
+                          </td>
+                        </Link>
                         <td className="px-6 py-4">
                           <span className="text-red-600 font-semibold">
                             {item?.orderStatus}

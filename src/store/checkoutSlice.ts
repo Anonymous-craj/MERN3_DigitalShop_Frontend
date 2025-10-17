@@ -3,11 +3,13 @@ import type { IData, IOrder, IOrderItems } from "../pages/checkout/types";
 import { Status } from "../globals/types/type";
 import type { AppDispatch } from "./store";
 import { APIWITHTOKEN } from "../http/apiType";
+import type { IOrderDetails } from "../pages/my-order-details/types";
 
 const initialState: IOrder = {
   status: Status.LOADING,
   items: [],
   khaltiUrl: null,
+  orderDetails: [],
 };
 
 const checkoutSlice = createSlice({
@@ -23,11 +25,15 @@ const checkoutSlice = createSlice({
     setKhaltiUrl(state: IOrder, action: PayloadAction<string>) {
       state.khaltiUrl = action.payload;
     },
+    setOrderDetails(state: IOrder, action: PayloadAction<IOrderDetails[]>) {
+      state.orderDetails = action.payload;
+    },
   },
 });
 
 export default checkoutSlice.reducer;
-export const { setItems, setStatus, setKhaltiUrl } = checkoutSlice.actions;
+export const { setItems, setStatus, setKhaltiUrl, setOrderDetails } =
+  checkoutSlice.actions;
 
 export function orderItem(data: IData) {
   return async function orderItemThunk(dispatch: AppDispatch) {
@@ -60,8 +66,12 @@ export function fetchMyOrders() {
   return async function fetchMyOrdersThunk(dispatch: AppDispatch) {
     try {
       const response = await APIWITHTOKEN.get("/order");
-      dispatch(setStatus(Status.SUCCESS));
-      dispatch(setItems(response.data.data));
+      if (response.status === 200) {
+        dispatch(setStatus(Status.SUCCESS));
+        dispatch(setItems(response.data.data));
+      } else {
+        dispatch(setStatus(Status.ERROR));
+      }
     } catch (error) {
       console.log(error);
       dispatch(setStatus(Status.ERROR));
@@ -69,12 +79,16 @@ export function fetchMyOrders() {
   };
 }
 
-export function fetchMyOrderDetail() {
-  return async function fetchMyOrdersThunk(dispatch: AppDispatch) {
+export function fetchMyOrderDetail(id: string) {
+  return async function fetchMyOrderDetailThunk(dispatch: AppDispatch) {
     try {
-      const response = await APIWITHTOKEN.get("/order");
-      dispatch(setStatus(Status.SUCCESS));
-      dispatch(setItems(response.data.data));
+      const response = await APIWITHTOKEN.get("/order/" + id);
+      if (response.status === 200) {
+        dispatch(setStatus(Status.SUCCESS));
+        dispatch(setOrderDetails(response.data.data));
+      } else {
+        dispatch(setStatus(Status.ERROR));
+      }
     } catch (error) {
       console.log(error);
       dispatch(setStatus(Status.ERROR));
