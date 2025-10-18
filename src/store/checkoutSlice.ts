@@ -3,7 +3,10 @@ import type { IData, IOrder, IOrderItems } from "../pages/checkout/types";
 import { Status } from "../globals/types/type";
 import type { AppDispatch } from "./store";
 import { APIWITHTOKEN } from "../http/apiType";
-import type { IOrderDetails } from "../pages/my-order-details/types";
+import {
+  OrderStatus,
+  type IOrderDetails,
+} from "../pages/my-order-details/types";
 
 const initialState: IOrder = {
   status: Status.LOADING,
@@ -28,12 +31,29 @@ const checkoutSlice = createSlice({
     setOrderDetails(state: IOrder, action: PayloadAction<IOrderDetails[]>) {
       state.orderDetails = action.payload;
     },
+    updateOrderStatusToCancel(
+      state: IOrder,
+      action: PayloadAction<{ orderId: string }>
+    ) {
+      const orderId = action.payload.orderId;
+      const datas = state.orderDetails.find(
+        (order) => order.orderId === orderId
+      );
+      if (datas) {
+        datas.Order.orderStatus = OrderStatus.Cancelled;
+      }
+    },
   },
 });
 
 export default checkoutSlice.reducer;
-export const { setItems, setStatus, setKhaltiUrl, setOrderDetails } =
-  checkoutSlice.actions;
+export const {
+  setItems,
+  setStatus,
+  setKhaltiUrl,
+  setOrderDetails,
+  updateOrderStatusToCancel,
+} = checkoutSlice.actions;
 
 export function orderItem(data: IData) {
   return async function orderItemThunk(dispatch: AppDispatch) {
@@ -86,6 +106,23 @@ export function fetchMyOrderDetail(id: string) {
       if (response.status === 200) {
         dispatch(setStatus(Status.SUCCESS));
         dispatch(setOrderDetails(response.data.data));
+      } else {
+        dispatch(setStatus(Status.ERROR));
+      }
+    } catch (error) {
+      console.log(error);
+      dispatch(setStatus(Status.ERROR));
+    }
+  };
+}
+
+export function cancelOrderApi(id: string) {
+  return async function cancelOrderApiThunk(dispatch: AppDispatch) {
+    try {
+      const response = await APIWITHTOKEN.patch("/order/cancel-order/" + id);
+      if (response.status === 200) {
+        dispatch(setStatus(Status.SUCCESS));
+        dispatch(updateOrderStatusToCancel({ orderId: id }));
       } else {
         dispatch(setStatus(Status.ERROR));
       }

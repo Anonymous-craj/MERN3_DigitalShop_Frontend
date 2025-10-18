@@ -13,6 +13,7 @@ export interface IProduct {
 
 export interface IOrderItems extends IProduct {
   id: string;
+  orderId: string;
 }
 
 export interface IOrder {

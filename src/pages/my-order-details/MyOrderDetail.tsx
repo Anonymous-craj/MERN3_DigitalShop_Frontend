@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import Navbar from "../../globals/components/Navbar";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { fetchMyOrderDetail } from "../../store/checkoutSlice";
+import { cancelOrderApi, fetchMyOrderDetail } from "../../store/checkoutSlice";
 import { useParams } from "react-router-dom";
+import { OrderStatus } from "./types";
 
 const MyOrderDetail = () => {
   const dispatch = useAppDispatch();
@@ -14,6 +15,12 @@ const MyOrderDetail = () => {
       dispatch(fetchMyOrderDetail(id));
     }
   }, []);
+
+  const cancelOrder = () => {
+    if (id) {
+      dispatch(cancelOrderApi(id));
+    }
+  };
   return (
     <>
       <Navbar />
@@ -27,6 +34,10 @@ const MyOrderDetail = () => {
           <p className="text-base dark:text-gray-300 font-medium leading-6 text-gray-600">
             <span>Created At: </span>
             {new Date(orderDetails[0]?.createdAt).toLocaleDateString()}
+          </p>
+          <p className="text-base dark:text-gray-300 font-medium leading-6 text-gray-600">
+            <span>Order Status: </span>
+            {orderDetails[0]?.Order?.orderStatus}
           </p>
         </div>
         <div className="mt-10 flex flex-col xl:flex-row jusitfy-center items-stretch w-full xl:space-x-8 space-y-4 md:space-y-6 xl:space-y-0">
@@ -145,9 +156,17 @@ const MyOrderDetail = () => {
                 </div>
               </div>
               <div className="flex flex-col justify-center px-4 py-6 md:p-6 xl:p-8 w-full bg-gray-50 dark:bg-gray-800 space-y-6">
-                <h3 className="text-xl dark:text-white font-semibold leading-5 text-gray-800">
-                  Shipping
-                </h3>
+                <div className="flex w-full justify-center items-center md:justify-start md:items-start">
+                  {orderDetails[0]?.Order?.orderStatus !==
+                    OrderStatus?.Cancelled && (
+                    <button
+                      onClick={cancelOrder}
+                      className="mt-6 md:mt-0 dark:border-white dark:hover:bg-gray-900 dark:bg-transparent dark:text-white py-5 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 border border-gray-800 font-medium w-96 2xl:w-full text-base leading-4 text-gray-800"
+                    >
+                      Cancel Order
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
