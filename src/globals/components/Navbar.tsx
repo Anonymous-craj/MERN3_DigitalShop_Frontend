@@ -48,15 +48,9 @@ const Navbar = () => {
             <Link className="px-4" to="/products">
               Products
             </Link>
-            <a className="px-4" href="#services">
-              Services
-            </a>
-            <a className="px-4" href="#stats">
-              Stats
-            </a>
-            <a className="px-4" href="#testimonials">
-              Testimonials
-            </a>
+            <Link className="px-4" to="/my-orders">
+              My Orders
+            </Link>
           </div>
           <div className="hidden md:block">
             {isLoggedIn ? (
