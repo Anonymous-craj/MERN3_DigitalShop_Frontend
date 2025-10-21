@@ -1,35 +1,30 @@
-import { useCallback, useState } from "react";
-import { handleDeleteCategoryItem } from "../../../../store/adminCategorySlice";
+import { useState } from "react";
+import { deleteUserById, type IUser } from "../../../../store/adminUserSlice";
 import { useAppDispatch } from "../../../../store/hooks";
-import type { ICategory } from "../Categories";
-import Modal from "./Modal";
 
-const CategoryTable = ({ categories }: { categories: ICategory[] }) => {
+const UserTable: React.FC<{ users: IUser[] }> = ({ users }) => {
   const dispatch = useAppDispatch();
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const handleDeleteCategory = (id: string) => {
+  const deleteUser = (id: string) => {
     if (id) {
-      dispatch(handleDeleteCategoryItem(id));
+      dispatch(deleteUserById(id));
     }
   };
 
-  const filteredCategories = categories.filter(
-    (category) =>
-      category.categoryName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      category.id.includes(searchTerm)
+  const filteredUsers = users.filter(
+    (user) =>
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.id.includes(searchTerm)
   );
-
-  const openModal = useCallback(() => setIsModalOpen(true), []);
-  const closeModal = useCallback(() => setIsModalOpen(false), []);
 
   return (
     <div className="flex flex-col">
-      <div className=" overflow-x-auto">
-        {isModalOpen && <Modal closeModal={closeModal} />}
+      <div className="overflow-x-auto">
         <div className="min-w-full inline-block align-middle">
-          <div className="relative  text-gray-500 focus-within:text-gray-900 mb-4">
-            <div className="absolute inset-y-0 left-1 flex items-center pl-3 pointer-events-none ">
+          {/* Search + CTA */}
+          <div className="relative text-gray-500 focus-within:text-gray-900 mb-4">
+            <div className="absolute inset-y-0 left-1 flex items-center pl-3 pointer-events-none">
               <svg
                 className="w-5 h-5"
                 viewBox="0 0 20 20"
@@ -66,53 +61,70 @@ const CategoryTable = ({ categories }: { categories: ICategory[] }) => {
                 className="block w-80 h-11 pr-5 pl-12 py-2.5 text-base font-normal shadow-xs text-gray-900 bg-transparent border border-gray-300 rounded-full placeholder-gray-400 focus:outline-none"
                 placeholder="Search"
               />
-              <button
-                onClick={openModal}
-                className="bg-blue-500 text-white rounded p-2 cursor-pointer"
-              >
-                Add Category
+              <button className="bg-blue-500 text-white rounded p-2 cursor-pointer">
+                Add User
               </button>
             </div>
           </div>
-          <div className="overflow-hidden ">
-            <table className=" min-w-full rounded-xl">
+
+          {/* Table */}
+          <div className="overflow-hidden rounded-xl border border-gray-200">
+            <table className="min-w-full table-fixed border-separate border-spacing-0">
               <thead>
                 <tr className="bg-gray-50">
                   <th
                     scope="col"
-                    className="p-5 text-left text-sm leading-6 font-semibold text-gray-900 capitalize"
+                    className="px-6 py-3 text-left text-sm font-semibold leading-6 text-gray-900 capitalize first:rounded-tl-xl w-32"
                   >
-                    Category ID
+                    User ID
                   </th>
                   <th
                     scope="col"
-                    className="p-5 text-left text-sm leading-6 font-semibold text-gray-900 capitalize"
+                    className="px-6 py-3 text-left text-sm font-semibold leading-6 text-gray-900 capitalize"
                   >
-                    Category Name
+                    User Name
                   </th>
-
                   <th
                     scope="col"
-                    className="p-5 text-left text-sm leading-6 font-semibold text-gray-900 capitalize rounded-t-xl"
+                    className="px-6 py-3 text-left text-sm font-semibold leading-6 text-gray-900 capitalize"
+                  >
+                    Email
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-right text-sm font-semibold leading-6 text-gray-900 capitalize last:rounded-tr-xl w-40"
                   >
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-300 ">
-                {filteredCategories.length > 0 &&
-                  filteredCategories.map((category) => {
+
+              <tbody className="divide-y divide-gray-300 bg-white">
+                {filteredUsers.length > 0 &&
+                  filteredUsers.map((user) => {
                     return (
-                      <tr className="bg-white transition-all duration-500 hover:bg-gray-50">
-                        <td className="p-5 whitespace-nowrap text-sm leading-6 font-medium text-gray-900">
-                          {category?.id}
+                      <tr className="transition-all duration-500 hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm leading-6 font-medium text-gray-900 align-middle">
+                          {user?.id}
                         </td>
-                        <td className="p-5 whitespace-nowrap text-sm leading-6 font-medium text-gray-900">
-                          {category?.categoryName}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm leading-6 font-medium text-gray-900 align-middle">
+                          {user?.username}
                         </td>
-                        <td className=" p-5 ">
-                          <div className="flex items-center gap-1">
-                            <button className="p-2  rounded-full  group transition-all duration-500  flex item-center">
+                        <td className="px-6 py-4 text-sm leading-6 text-gray-700 align-middle">
+                          {/* Prevent long emails from pushing layout */}
+                          <div className="max-w-[18rem] sm:max-w-[28rem] truncate">
+                            {user?.email}
+                          </div>
+                        </td>
+
+                        {/* Actions under Actions column */}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm leading-6 text-gray-700 align-middle text-right w-40">
+                          <div className="flex items-center justify-end gap-2">
+                            {/* UPDATE / EDIT */}
+                            <button
+                              className="p-2 rounded-full group transition-all duration-500 flex items-center"
+                              title="Edit"
+                            >
                               <svg
                                 className="cursor-pointer"
                                 width={20}
@@ -128,9 +140,12 @@ const CategoryTable = ({ categories }: { categories: ICategory[] }) => {
                                 />
                               </svg>
                             </button>
+
+                            {/* DELETE */}
                             <button
-                              onClick={() => handleDeleteCategory(category.id)}
-                              className="p-2 rounded-full  group transition-all duration-500  flex item-center"
+                              onClick={() => deleteUser(user.id)}
+                              className="p-2 rounded-full group transition-all duration-500 flex items-center"
+                              title="Delete"
                             >
                               <svg
                                 width={20}
@@ -146,7 +161,12 @@ const CategoryTable = ({ categories }: { categories: ICategory[] }) => {
                                 />
                               </svg>
                             </button>
-                            <button className="p-2 rounded-full  group transition-all duration-500  flex item-center">
+
+                            {/* MORE */}
+                            <button
+                              className="p-2 rounded-full group transition-all duration-500 flex items-center"
+                              title="More"
+                            >
                               <svg
                                 width={20}
                                 height={20}
@@ -177,4 +197,4 @@ const CategoryTable = ({ categories }: { categories: ICategory[] }) => {
   );
 };
 
-export default CategoryTable;
+export default UserTable;

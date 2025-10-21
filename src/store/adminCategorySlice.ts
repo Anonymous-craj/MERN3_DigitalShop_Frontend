@@ -26,11 +26,22 @@ const categoriesSlice = createSlice({
       state.items = action.payload;
     },
 
+    addToCategoryItems(
+      state: ICategoryInitialState,
+      action: PayloadAction<ICategory>
+    ) {
+      state.items.push(action.payload);
+    },
+
     setStatus(state: ICategoryInitialState, action: PayloadAction<Status>) {
       state.status = action.payload;
     },
 
-    setDeleteCartItem(
+    resetStatus(state: ICategoryInitialState) {
+      state.status = Status.LOADING;
+    },
+
+    setDeleteCategoryItem(
       state: ICategoryInitialState,
       action: PayloadAction<string>
     ) {
@@ -42,29 +53,31 @@ const categoriesSlice = createSlice({
   },
 });
 
-export const { setItems, setStatus, setDeleteCartItem } =
-  categoriesSlice.actions;
+export const {
+  setItems,
+  setStatus,
+  setDeleteCategoryItem,
+  addToCategoryItems,
+  resetStatus,
+} = categoriesSlice.actions;
 export default categoriesSlice.reducer;
 
-// export function addCategories(productId: string) {
-//   return async function addCategoriesThunk(dispatch: AppDispatch) {
-//     try {
-//       const response = await APIWITHTOKEN.post("/category", {
-//         productId: productId,
-//         quantity: 1,
-//       });
-//       if (response.status === 200) {
-//         dispatch(setStatus(Status.SUCCESS));
-//         dispatch(setItems(response.data.data));
-//       } else {
-//         dispatch(setStatus(Status.ERROR));
-//       }
-//     } catch (error) {
-//       console.log(error);
-//       dispatch(setStatus(Status.ERROR));
-//     }
-//   };
-// }
+export function addCategories(categoryName: string) {
+  return async function addCategoriesThunk(dispatch: AppDispatch) {
+    try {
+      const response = await APIWITHTOKEN.post("/category", { categoryName });
+      if (response.status === 201) {
+        dispatch(setStatus(Status.SUCCESS));
+        dispatch(addToCategoryItems(response.data.data));
+      } else {
+        dispatch(setStatus(Status.ERROR));
+      }
+    } catch (error) {
+      console.log(error);
+      dispatch(setStatus(Status.ERROR));
+    }
+  };
+}
 
 export function fetchCategoryItems() {
   return async function fetchCategoryItemsThunk(dispatch: AppDispatch) {
@@ -88,7 +101,7 @@ export function handleDeleteCategoryItem(categoryId: string) {
     try {
       const response = await APIWITHTOKEN.delete("/category/" + categoryId);
       if (response.status === 200) {
-        dispatch(setDeleteCartItem(categoryId));
+        dispatch(setDeleteCategoryItem(categoryId));
         dispatch(setStatus(Status.SUCCESS));
       } else {
         dispatch(setStatus(Status.SUCCESS));
