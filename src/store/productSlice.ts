@@ -17,18 +17,16 @@ const productSlice = createSlice({
     setProducts(state: IProducts, action: PayloadAction<IProduct[]>) {
       state.products = action.payload;
     },
-
     setStatus(state: IProducts, action: PayloadAction<Status>) {
       state.status = action.payload;
     },
-
     setProduct(state: IProducts, action: PayloadAction<IProduct>) {
       state.product = action.payload;
     },
   },
 });
 
-export const { setProducts, setStatus, setProduct } = productSlice.actions;
+export const { setStatus, setProducts, setProduct } = productSlice.actions;
 export default productSlice.reducer;
 
 export function fetchProducts() {
@@ -57,6 +55,7 @@ export function fetchProduct(id: string) {
     const productExists = store.products.products.find(
       (product: IProduct) => product.id === id
     );
+
     if (productExists) {
       dispatch(setProduct(productExists));
       dispatch(setStatus(Status.SUCCESS));
@@ -64,10 +63,8 @@ export function fetchProduct(id: string) {
       try {
         const response = await API.get("/product/" + id);
         if (response.status === 200) {
-          const data =
-            response.data.data.length > 0 ? response.data.data[0] : null;
           dispatch(setStatus(Status.SUCCESS));
-          dispatch(setProduct(data));
+          dispatch(setProduct(response.data.data));
         } else {
           dispatch(setStatus(Status.ERROR));
         }

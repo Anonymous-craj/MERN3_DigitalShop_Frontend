@@ -7,7 +7,7 @@ interface ICardProps {
 
 const Card: React.FC<ICardProps> = ({ product }) => {
   return (
-    <Link to={`/products/${product.id}`}>
+    <Link to={`/products/${product?.id}`}>
       <div className="w-72 bg-white shadow-md rounded-xl duration-500 hover:scale-105 hover:shadow-xl">
         <a href="#">
           <img
@@ -17,7 +17,7 @@ const Card: React.FC<ICardProps> = ({ product }) => {
           />
           <div className="px-4 py-3 w-72">
             <span className="text-gray-400 mr-3 uppercase text-xs">
-              {product?.Category.categoryName}
+              {product?.Category?.categoryName}
             </span>
             <p className="text-lg font-bold text-black truncate block capitalize">
               {product?.productName}

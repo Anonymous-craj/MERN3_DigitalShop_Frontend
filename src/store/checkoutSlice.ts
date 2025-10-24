@@ -43,6 +43,20 @@ const checkoutSlice = createSlice({
         datas.Order.orderStatus = OrderStatus.Cancelled;
       }
     },
+    updateOrderStatusinSlice(
+      state: IOrder,
+      action: PayloadAction<{
+        status: OrderStatus;
+        orderId: string;
+        userId: string;
+      }>
+    ) {
+      const { status, orderId } = action.payload;
+      const updatedOrder = state.items.map((order) =>
+        order.id === orderId ? { ...order, orderStatus: status } : order
+      );
+      state.items = updatedOrder;
+    },
   },
 });
 
@@ -53,6 +67,7 @@ export const {
   setKhaltiUrl,
   setOrderDetails,
   updateOrderStatusToCancel,
+  updateOrderStatusinSlice,
 } = checkoutSlice.actions;
 
 export function orderItem(data: IData) {

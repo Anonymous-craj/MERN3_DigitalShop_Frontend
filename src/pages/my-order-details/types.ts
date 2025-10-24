@@ -7,6 +7,7 @@ export interface IOrderDetails {
   Order: {
     firstName: string;
     lastName: string;
+    userId: string;
     email: string;
     totalAmount: number;
     phoneNumber: string;

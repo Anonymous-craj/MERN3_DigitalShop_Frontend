@@ -146,7 +146,7 @@ const SingleProduct = () => {
                   Category:
                 </span>
                 <span className="text-[#7f7f7f] text-sm font-normal leading-[21px]">
-                  {product?.Category.categoryName}
+                  {product?.Category?.categoryName}
                 </span>
               </div>
             </div>
