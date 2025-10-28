@@ -3,18 +3,18 @@ import Navbar from "../../globals/components/Navbar";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { fetchProduct } from "../../store/productSlice";
 import { useParams } from "react-router-dom";
-import { Status } from "../../globals/types/type";
 import { addToCart } from "../../store/cartSlice";
 
-const SingleProduct = () => {
-  const { product, status } = useAppSelector((store) => store.products);
+function SingleProduct() {
   const { id } = useParams();
+  const { product } = useAppSelector((store) => store.products);
   const dispatch = useAppDispatch();
+
   useEffect(() => {
     if (id) {
       dispatch(fetchProduct(id));
     }
-  }, []);
+  }, [id, dispatch]);
 
   const handleAddToCart = () => {
     if (id) {
@@ -22,139 +22,125 @@ const SingleProduct = () => {
     }
   };
 
-  // Loader
-  if (status === Status.LOADING) {
-    return (
-      <>
-        <Navbar />
-        <section className="font-['Poppins'] flex items-center justify-center h-[100vh]">
-          <div className="flex w-[1300px] p-10 bg-white">
-            {/* Image placeholder */}
-            <div className="w-[556px] h-[400px] rounded-2xl shimmer" />
-
-            {/* Text placeholders */}
-            <div className="ml-8 flex-1 space-y-6">
-              <div className="h-10 w-1/2 rounded shimmer" />
-              <div className="h-8 w-1/3 rounded shimmer" />
-              <div className="h-24 w-4/5 rounded shimmer" />
-              <div className="h-10 w-1/3 rounded shimmer" />
-              <div className="h-8 w-1/4 rounded shimmer" />
-            </div>
-          </div>
-        </section>
-      </>
-    );
-  }
-
-  // ✅ Error State
-  if (status === Status.ERROR) {
-    return (
-      <>
-        <Navbar />
-        <div className="h-[100vh] flex items-center justify-center">
-          <p className="text-lg text-red-500 font-medium">
-            Failed to load product. Please try again later.
-          </p>
-        </div>
-      </>
-    );
-  }
   return (
     <>
       <Navbar />
-      <section className="font-['Poppins'] flex items-center justify-center h-[100vh]">
-        <div className="flex w-[1300px] p-10 bg-white ">
-          <img
-            className="w-[556px] ml-3 mr-6 rounded-2xl"
-            src={`http://localhost:3000/${product?.productImageUrl}`}
-          />
-          <div>
-            <div className="flex gap-2 items-center">
-              <h1 className="text-[36px] leading-[44px] font-semibold text-black">
-                {product?.productName}
-              </h1>
-            </div>
+      {/* Page backdrop */}
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 py-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Product shell (glassy) */}
+          <div className="rounded-3xl border border-gray-200/70 dark:border-gray-800/70 bg-white/70 dark:bg-gray-900/60 backdrop-blur shadow-xl">
+            <div className="flex flex-col lg:flex-row">
+              {/* Left: media */}
+              <div className="lg:w-1/2 p-6 lg:p-8">
+                <div className="relative rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 ring-1 ring-gray-200/70 dark:ring-gray-800/70 shadow-md">
+                  {/* subtle corner gradient sheen */}
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-black/5 dark:to-white/5" />
+                  <img
+                    className="w-full h-[460px] object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"
+                    src={`http://localhost:3000/${product?.productImageUrl}`}
+                    alt={product?.productName ?? "Product Image"}
+                  />
 
-            <div className="h-9 mt-5 justify-start items-center gap-3 inline-flex">
-              <div className="justify-start items-center gap-1 flex">
-                <span className="text-xl">Price:</span>
-                <div className="text-[#2c732f] text-2xl font-medium leading-9">
-                  Rs.{product?.productPrice}
+                  {/* top-left badges */}
+                  <div className="absolute top-4 left-4 flex items-center gap-2">
+                    {product?.Category?.categoryName && (
+                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/90 dark:bg-gray-900/80 text-gray-800 dark:text-gray-200 shadow-sm">
+                        {product?.Category?.categoryName}
+                      </span>
+                    )}
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-600 text-white shadow-sm">
+                      In Stock: {product?.productTotalStock ?? 0}
+                    </span>
+                  </div>
                 </div>
-                <span className="text-xl ml-5">Discount: </span>
-                <div className="text-[#b3b3b3] text-xl font-normal line-through leading-[30px]">
-                  Rs.{product?.discount}
-                </div>
-              </div>
-            </div>
 
-            <p className="w-[500px] text-justify text-[#7f7f7f] text-sm font-normal mt-4 leading-[21px]">
-              {product?.productDescription}
-            </p>
-            <div className="h-[88px] mt-6 py-[18px] bg-white shadow-[0px_1px_0px_0px_rgba(229,229,229,1.00)] border border-white justify-center items-center gap-3 flex mr-40">
-              <button
-                className="h-[51px] px-20 py-4 bg-[#00b206] rounded-[43px] justify-center items-center gap-4 flex cursor-pointer"
-                onClick={handleAddToCart}
-              >
-                <span className="text-white text-base font-semibold leading-tight ">
-                  Add to Cart
-                </span>
-                <div>
-                  <svg
-                    width={17}
-                    height={18}
-                    viewBox="0 0 17 18"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+                {/* CTAs */}
+                <div className="mt-6 flex flex-col sm:flex-row gap-4">
+                  <button
+                    className="flex-1 inline-flex items-center justify-center rounded-full bg-gray-900 dark:bg-gray-600 text-white font-semibold py-3 px-4 shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg hover:bg-black dark:hover:bg-gray-700"
+                    onClick={handleAddToCart}
                   >
-                    <path
-                      d="M5.16667 7.33333H2.66667L1 16.5H16L14.3333 7.33333H11.8333M5.16667 7.33333V4.83333C5.16667 2.99239 6.65905 1.5 8.5 1.5V1.5C10.3409 1.5 11.8333 2.99238 11.8333 4.83333V7.33333M5.16667 7.33333H11.8333M5.16667 7.33333V9.83333M11.8333 7.33333V9.83333"
-                      stroke="white"
-                      strokeWidth="1.3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                    Add to Cart
+                  </button>
+                  <button className="flex-1 inline-flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold py-3 px-4 ring-1 ring-gray-200 dark:ring-gray-700 transition-all hover:-translate-y-0.5 hover:shadow-lg hover:bg-gray-200 dark:hover:bg-gray-700">
+                    Add to Wishlist
+                  </button>
                 </div>
-              </button>
-              <div>
-                <svg
-                  width={52}
-                  height={52}
-                  viewBox="0 0 52 52"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <rect
-                    width={52}
-                    height={52}
-                    rx={26}
-                    fill="#20B526"
-                    fillOpacity="0.1"
-                  />
-                  <path
-                    d="M25.9996 33.5451C9.33328 24.3334 20.9999 14.3334 25.9996 20.6567C30.9999 14.3334 42.6666 24.3334 25.9996 33.5451Z"
-                    stroke="#2C742F"
-                    strokeWidth="1.5"
-                  />
-                </svg>
               </div>
-            </div>
-            <div className="h-[54px] mt-6 flex-col justify-start items-start gap-3 inline-flex">
-              <div className="justify-start items-start gap-1.5 inline-flex">
-                <span className="text-[#191919] text-sm font-medium leading-[21px]">
-                  Category:
-                </span>
-                <span className="text-[#7f7f7f] text-sm font-normal leading-[21px]">
-                  {product?.Category?.categoryName}
-                </span>
+
+              {/* Right: details */}
+              <div className="lg:w-1/2 p-6 lg:p-10">
+                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+                  {product?.productName}
+                </h2>
+
+                {/* Price + availability */}
+                <div className="mt-5 flex flex-wrap items-center gap-6">
+                  <div className="inline-flex items-baseline gap-2">
+                    <span className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                      Price
+                    </span>
+                    <span className="text-3xl font-extrabold text-gray-900 dark:text-white">
+                      Rs.{product?.productPrice}
+                    </span>
+                  </div>
+
+                  <div className="inline-flex items-center gap-2">
+                    <span className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                      Availability
+                    </span>
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                      In Stock ({product?.productTotalStock ?? 0})
+                    </span>
+                  </div>
+                </div>
+
+                {/* Category */}
+                <div className="mt-6">
+                  <span className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                    Category
+                  </span>
+                  <div className="mt-2">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 ring-1 ring-gray-200 dark:ring-gray-700">
+                      {product?.Category?.categoryName ?? "—"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="mt-8">
+                  <span className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                    Product Description
+                  </span>
+                  <p className="mt-3 text-gray-700 dark:text-gray-300 leading-relaxed">
+                    {product?.productDescription}
+                  </p>
+                </div>
+
+                {/* subtle divider */}
+                <div className="mt-10 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-800 to-transparent" />
+
+                {/* tiny reassurance row (optional, purely visual) */}
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-300">
+                  <div className="rounded-xl bg-gray-50 dark:bg-gray-800/60 ring-1 ring-gray-200 dark:ring-gray-800 p-3">
+                    ✅ Genuine Product
+                  </div>
+                  <div className="rounded-xl bg-gray-50 dark:bg-gray-800/60 ring-1 ring-gray-200 dark:ring-gray-800 p-3">
+                    🚚 Fast Delivery
+                  </div>
+                  <div className="rounded-xl bg-gray-50 dark:bg-gray-800/60 ring-1 ring-gray-200 dark:ring-gray-800 p-3">
+                    🔒 Secure Checkout
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+          {/* /product shell */}
         </div>
-      </section>
+      </div>
     </>
   );
-};
+}
 
 export default SingleProduct;

@@ -5,7 +5,7 @@ import {
   type ILogin,
   type IUser,
 } from "../globals/types/type";
-import type { AppDispatch } from "./store";
+import { type AppDispatch } from "./store";
 import { API, APIWITHTOKEN } from "../http/apiType";
 
 const initialState: IAuthState = {
@@ -15,6 +15,8 @@ const initialState: IAuthState = {
     password: null,
     token: null,
   },
+  registerStatus: Status.LOADING, // Separate register status
+  loginStatus: Status.LOADING, // Separate login status
   status: Status.LOADING,
 };
 
@@ -25,16 +27,35 @@ const authSlice = createSlice({
     setUser(state: IAuthState, action: PayloadAction<IUser>) {
       state.user = action.payload;
     },
-    setStatus(state: IAuthState, action: PayloadAction<Status>) {
-      state.status = action.payload;
+    setRegisterStatus(state: IAuthState, action: PayloadAction<Status>) {
+      state.registerStatus = action.payload;
+    },
+
+    setLoginStatus(state: IAuthState, action: PayloadAction<Status>) {
+      state.loginStatus = action.payload;
     },
     setToken(state: IAuthState, action: PayloadAction<string>) {
       state.user.token = action.payload;
     },
+    resetUser(state: IAuthState) {
+      state.user = {
+        username: null,
+        email: null,
+        password: null,
+        token: null,
+      };
+      state.loginStatus = Status.LOADING;
+    },
   },
 });
 
-export const { setUser, setStatus, setToken } = authSlice.actions;
+export const {
+  setUser,
+  setRegisterStatus,
+  setLoginStatus,
+  setToken,
+  resetUser,
+} = authSlice.actions;
 export default authSlice.reducer;
 
 export function registerUser(data: IUser) {
@@ -43,19 +64,17 @@ export function registerUser(data: IUser) {
       const response = await API.post("/register", data);
       console.log(response);
       if (response.status === 201) {
-        dispatch(setStatus(Status.SUCCESS));
+        dispatch(setRegisterStatus(Status.SUCCESS)); // Set register status to success
         dispatch(setUser(data));
       } else {
-        dispatch(setStatus(Status.ERROR));
+        dispatch(setRegisterStatus(Status.ERROR)); // Handle error case
       }
     } catch (error) {
       console.log(error);
-      dispatch(setStatus(Status.ERROR));
+      dispatch(setRegisterStatus(Status.ERROR)); // Handle error case
     }
   };
 }
-
-//Async thunk function for userLogin
 
 export function loginUser(data: ILogin) {
   return async function loginUserThunk(dispatch: AppDispatch) {
@@ -63,17 +82,17 @@ export function loginUser(data: ILogin) {
       const response = await APIWITHTOKEN.post("/login", data);
       console.log(response);
       if (response.status === 200) {
-        dispatch(setStatus(Status.SUCCESS));
+        dispatch(setLoginStatus(Status.SUCCESS)); // Set login status to success
         if (response.data.token) {
-          localStorage.setItem("token", response.data.token);
+          localStorage.setItem("token", response.data.token); // Store token in localStorage
           dispatch(setToken(response.data.token));
         } else {
-          dispatch(setStatus(Status.ERROR));
+          dispatch(setLoginStatus(Status.ERROR)); // Handle error case
         }
       }
     } catch (error) {
       console.log(error);
-      dispatch(setStatus(Status.ERROR));
+      dispatch(setLoginStatus(Status.ERROR)); // Handle error case
     }
   };
 }

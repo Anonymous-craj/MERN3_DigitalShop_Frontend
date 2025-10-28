@@ -55,7 +55,7 @@ export default cartSlice.reducer;
 export function addToCart(productId: string) {
   return async function addToCartThunk(dispatch: AppDispatch) {
     try {
-      const response = await APIWITHTOKEN.post("/cart", {
+      const response = await APIWITHTOKEN.post("/cart/", {
         productId: productId,
         quantity: 1,
       });
@@ -75,7 +75,7 @@ export function addToCart(productId: string) {
 export function fetchCartItems() {
   return async function fetchCartItemsThunk(dispatch: AppDispatch) {
     try {
-      const response = await APIWITHTOKEN.get("/cart");
+      const response = await APIWITHTOKEN.get("/cart/");
       if (response.status === 200) {
         dispatch(setStatus(Status.SUCCESS));
         dispatch(setItems(response.data.data));

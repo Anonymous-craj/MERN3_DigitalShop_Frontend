@@ -20,6 +20,9 @@ import User from "./pages/admin/users/Users";
 import AdminProduct from "./pages/admin/products/AdminProducts";
 import AdminOrders from "./pages/admin/orders/AdminOrders";
 import AdminOrderDetail from "./pages/admin/order-details/AdminOrderDetails";
+import { Toaster } from "react-hot-toast";
+import ForgotPassword from "./pages/forgot-password/ForgotPassword";
+import VerifyOtp from "./pages/otp-verify/VerifyOtp";
 
 export default function App() {
   useEffect(() => {
@@ -32,6 +35,7 @@ export default function App() {
   return (
     <Provider store={store}>
       <BrowserRouter>
+        <Toaster position="top-center" toastOptions={{ duration: 2500 }} />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
@@ -48,6 +52,8 @@ export default function App() {
           <Route path="/admin/products" element={<AdminProduct />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/admin/orders/:id" element={<AdminOrderDetail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/verify-otp" element={<VerifyOtp />} />
         </Routes>
       </BrowserRouter>
     </Provider>

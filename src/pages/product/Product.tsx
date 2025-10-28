@@ -7,32 +7,32 @@ import { fetchProducts } from "../../store/productSlice";
 function Product() {
   const dispatch = useAppDispatch();
   const { products } = useAppSelector((store) => store.products);
+
   useEffect(() => {
     dispatch(fetchProducts());
-  }, []);
+  }, [dispatch]);
 
   return (
     <>
       <Navbar />
-      <div>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
         <section
-          id="Projects"
-          className="w-fit mx-auto grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 justify-items-center justify-center gap-y-20 gap-x-14 mt-10 mb-5"
+          id="Products"
+          className="
+            max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10
+            grid justify-center gap-8
+            grid-cols-1
+            sm:grid-cols-2
+            md:grid-cols-3
+            lg:grid-cols-3
+            xl:grid-cols-4
+          "
         >
           {products.length > 0 &&
-            products.map((product) => {
-              return <Card product={product} />;
-            })}
+            products.map((product) => (
+              <Card key={String(product?.id)} product={product} />
+            ))}
         </section>
-
-        {/* Support Me 🙏🥰 */}
-        <script>
-          kofiWidgetOverlay.draw('mohamedghulam', {"{"}
-          'type': 'floating-chat', 'floating-chat.donateButton.text': 'Support
-          me', 'floating-chat.donateButton.background-color': '#323842',
-          'floating-chat.donateButton.text-color': '#fff'
-          {"}"});
-        </script>
       </div>
     </>
   );

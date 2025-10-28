@@ -11,6 +11,8 @@ export interface IUser {
 
 export interface IAuthState {
   user: IUser;
+  registerStatus: Status;
+  loginStatus: Status;
   status: Status;
 }
 
