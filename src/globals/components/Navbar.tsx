@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { useEffect, useState } from "react";
 import { fetchCartItems } from "../../store/cartSlice";
-import { resetUser } from "../../store/authSlice";
+import { resetLoginErrorMessage, resetUser } from "../../store/authSlice";
 import toast from "react-hot-toast";
 
 const Navbar = () => {
@@ -33,6 +33,9 @@ const Navbar = () => {
 
     // Reset user data in Redux store
     dispatch(resetUser());
+
+    // Reset the login error message explicitly
+    dispatch(resetLoginErrorMessage()); // Reset the error message in case it was set
 
     // Show toast notification
     toast.success("Logged out successfully!");

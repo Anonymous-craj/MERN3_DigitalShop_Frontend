@@ -8,6 +8,7 @@ import {
 import { type AppDispatch } from "./store";
 import { API, APIWITHTOKEN } from "../http/apiType";
 import { AxiosError } from "axios";
+import toast from "react-hot-toast"; // Import toast
 
 const initialState: IAuthState = {
   user: {
@@ -20,6 +21,8 @@ const initialState: IAuthState = {
   loginStatus: Status.LOADING,
   status: Status.LOADING,
   errorMessage: "", // Add errorMessage to state
+  otpError: "", // Store OTP-related error message
+  otpVerified: false, // Track if OTP is verified
 };
 
 const authSlice = createSlice({
@@ -41,6 +44,15 @@ const authSlice = createSlice({
     setLoginErrorMessage(state: IAuthState, action: PayloadAction<string>) {
       state.errorMessage = action.payload; // Store the error message in the state
     },
+    resetLoginErrorMessage(state: IAuthState) {
+      state.errorMessage = ""; // Reset the error message
+    },
+    setOtpErrorMessage(state: IAuthState, action: PayloadAction<string>) {
+      state.otpError = action.payload; // Store OTP error message
+    },
+    setOtpVerified(state: IAuthState, action: PayloadAction<boolean>) {
+      state.otpVerified = action.payload; // Set OTP verified status
+    },
     resetUser(state: IAuthState) {
       state.user = {
         username: null,
@@ -49,6 +61,9 @@ const authSlice = createSlice({
         token: null,
       };
       state.loginStatus = Status.LOADING;
+      state.otpVerified = false; // Reset OTP verification status
+      state.otpError = ""; // Reset OTP error message
+      state.errorMessage = ""; // Reset the error message on logout as well
     },
   },
 });
@@ -59,6 +74,9 @@ export const {
   setLoginStatus,
   setToken,
   setLoginErrorMessage,
+  resetLoginErrorMessage, // Export the reset action
+  setOtpErrorMessage,
+  setOtpVerified,
   resetUser,
 } = authSlice.actions;
 
@@ -90,6 +108,7 @@ export function loginUser(data: ILogin) {
 
       if (response.status === 200) {
         dispatch(setLoginStatus(Status.SUCCESS)); // Set login status to success
+        dispatch(resetLoginErrorMessage()); // Reset the error message on successful login
         if (response.data.token) {
           localStorage.setItem("token", response.data.token); // Store token in localStorage
           dispatch(setToken(response.data.token));
@@ -117,6 +136,49 @@ export function loginUser(data: ILogin) {
         dispatch(
           setLoginErrorMessage("An unknown error occurred. Please try again.")
         );
+      }
+    }
+  };
+}
+
+export function verifyOtp(data: { email: string; otp: string }) {
+  return async function verifyOtpThunk(dispatch: AppDispatch) {
+    try {
+      const response = await APIWITHTOKEN.post("/verify-otp", data);
+
+      if (response.status === 200) {
+        dispatch(setOtpVerified(true)); // OTP is verified
+        toast.success("OTP verified successfully!");
+      }
+    } catch (error: unknown) {
+      // Make sure error is typed as 'unknown'
+
+      console.log(error);
+
+      // Narrowing the error type using 'instanceof AxiosError'
+      if (error instanceof AxiosError) {
+        // Handle OTP expiration or invalid OTP
+        if (
+          error.response &&
+          error.response.data.message ===
+            "OTP expired. Please request a new one."
+        ) {
+          dispatch(
+            setOtpErrorMessage("OTP expired. Please request a new one.")
+          );
+        } else if (
+          error.response &&
+          error.response.data.message === "Invalid OTP"
+        ) {
+          dispatch(setOtpErrorMessage("Invalid OTP. Please try again."));
+        } else {
+          dispatch(
+            setOtpErrorMessage("Something went wrong. Please try again.")
+          );
+        }
+      } else {
+        // Handle cases where error is not an AxiosError
+        dispatch(setOtpErrorMessage("An unexpected error occurred."));
       }
     }
   };

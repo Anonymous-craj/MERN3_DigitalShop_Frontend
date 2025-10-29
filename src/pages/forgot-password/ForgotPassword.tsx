@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import toast from "react-hot-toast";
 import { API } from "../../http/apiType";
 
@@ -28,7 +27,6 @@ const ForgotPassword = () => {
       }
     } catch (error) {
       console.log(error);
-
       toast.error("Something went wrong! Please try again.");
     }
 

@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { registerUser } from "../../store/authSlice";
 import { Status } from "../../globals/types/type";
@@ -9,7 +9,7 @@ import { AxiosError } from "axios";
 const Register = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { registerStatus } = useAppSelector((store) => store.auth); // status from Redux store
+  const { registerStatus } = useAppSelector((store) => store.auth);
   const [data, setData] = useState({
     username: "",
     email: "",
@@ -18,9 +18,8 @@ const Register = () => {
 
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [emailExists, setEmailExists] = useState(false); // Track if the email exists
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setData({
       ...data,
@@ -28,26 +27,26 @@ const Register = () => {
     });
   };
 
+  // Listen for registration success or failure
   useEffect(() => {
     if (registerStatus === Status.SUCCESS) {
       toast.success("User registered successfully!");
-      // After successful registration, redirect to login page
-      navigate("/login");
+      navigate("/login"); // Redirect after successful registration
     } else if (registerStatus === Status.ERROR) {
       setError("Something went wrong! Please try again.");
-      setIsLoading(false); // Stop loading when error occurs
+      setIsLoading(false);
     }
   }, [registerStatus, navigate]);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true); // Show loading state
-    setError(null); // Reset previous error
+    setIsLoading(true);
+    setError(null); // Reset error on each attempt
 
-    // Frontend Validation
+    // Basic Frontend Validation
     if (!data.username || !data.email || !data.password) {
       setError("All fields are required.");
-      setIsLoading(false); // Stop loading on validation failure
+      setIsLoading(false);
       return;
     }
 
@@ -57,27 +56,17 @@ const Register = () => {
       return;
     }
 
-    // Check if email exists before submitting
-    if (emailExists) {
-      setError(
-        "This email is already registered. Please try a different email."
-      );
-      setIsLoading(false);
-      return;
-    }
-
-    // Dispatch registration action
     try {
-      await dispatch(registerUser(data)); // Assuming registerUser returns a promise
+      // Attempt to register user
+      await dispatch(registerUser(data)); // dispatch register action
     } catch (error: unknown) {
-      // Handle error if email already exists (sent from backend)
+      // Error handling based on Axios response
       if (error instanceof AxiosError) {
         if (
           error.response &&
           error.response.status === 400 &&
           error.response.data.message.includes("email")
         ) {
-          setEmailExists(true); // Email is already taken, update state
           setError(
             "This email is already registered. Please try a different email."
           );
@@ -85,35 +74,21 @@ const Register = () => {
           setError("Something went wrong! Please try again.");
         }
       } else {
-        // If it's not an Axios error, log the error
         setError("An unknown error occurred.");
       }
       setIsLoading(false);
     }
   };
 
-  const isSuccess = registerStatus === Status.SUCCESS;
-
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50">
-      {/* Progress Bar */}
       {isLoading && (
         <div className="fixed top-0 left-0 right-0 h-1 overflow-hidden z-50">
           <div className="h-full w-1/3 animate-[progress_1.2s_ease-in-out_infinite] bg-gradient-to-r from-sky-500 to-blue-600 rounded-r-full" />
         </div>
       )}
-      <style>
-        {`
-          @keyframes progress {
-            0% { transform: translateX(-100%); }
-            50% { transform: translateX(50%); }
-            100% { transform: translateX(120%); }
-          }
-        `}
-      </style>
 
-      {/* Success Overlay */}
-      {isSuccess && (
+      {registerStatus === Status.SUCCESS && (
         <div className="fixed inset-0 z-40 grid place-items-center bg-white/70 backdrop-blur-sm">
           <div className="flex items-center gap-3 rounded-xl bg-white ring-1 ring-slate-200 shadow-lg px-4 py-3">
             <svg
@@ -140,8 +115,6 @@ const Register = () => {
       <div className="flex h-screen items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md">
           <div className="relative rounded-2xl bg-white/80 backdrop-blur-xl ring-1 ring-slate-200 shadow-xl p-6 sm:p-8">
-            <span className="pointer-events-none absolute -top-8 -right-8 h-24 w-24 rounded-full bg-sky-500/20 blur-2xl" />
-
             <div className="mx-auto mb-4 h-14 w-14 grid place-content-center rounded-2xl ring-1 ring-sky-100 bg-gradient-to-br from-sky-50 to-white shadow-sm">
               <svg viewBox="0 0 64 64" className="h-8 w-8" aria-hidden>
                 <defs>

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
 import toast from "react-hot-toast";
 import { APIWITHTOKEN } from "../../http/apiType";
+import { AxiosError } from "axios"; // Make sure to import AxiosError
 
 const VerifyOtp = () => {
   const navigate = useNavigate();
@@ -12,6 +12,7 @@ const VerifyOtp = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [otpError, setOtpError] = useState(""); // To display OTP error message
 
   const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setOtp(e.target.value);
@@ -32,6 +33,7 @@ const VerifyOtp = () => {
     setIsSubmitting(true);
 
     try {
+      // Step 1: Verify OTP
       const otpResponse = await APIWITHTOKEN.post("/verify-otp", {
         email,
         otp,
@@ -57,7 +59,24 @@ const VerifyOtp = () => {
     } catch (error) {
       console.log(error);
 
-      toast.error("Something went wrong! Please try again.");
+      // OTP expired error handling
+
+      // Type narrowing: Check if error is an AxiosError
+      if (error instanceof AxiosError) {
+        // OTP expired error handling
+        if (
+          error.response &&
+          error.response.data.message ===
+            "OTP expired. Please request a new one."
+        ) {
+          setOtpError("OTP expired. Please request a new one.");
+        } else {
+          toast.error("Something went wrong! Please try again.");
+        }
+      } else {
+        // Handle unexpected errors
+        toast.error("An unexpected error occurred.");
+      }
     }
 
     setIsSubmitting(false);
@@ -121,6 +140,14 @@ const VerifyOtp = () => {
               className="w-full p-3 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-500"
             />
           </div>
+
+          {/* Display OTP expiry error */}
+          {otpError && (
+            <div className="text-sm text-red-600 mt-2">
+              {otpError} {/* Show OTP expired error */}
+            </div>
+          )}
+
           <div>
             <button
               type="submit"

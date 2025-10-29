@@ -15,6 +15,8 @@ export interface IAuthState {
   loginStatus: Status;
   status: Status;
   errorMessage: string;
+  otpError: string;
+  otpVerified: boolean;
 }
 
 export enum Status {
