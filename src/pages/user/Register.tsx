@@ -4,6 +4,7 @@ import { registerUser } from "../../store/authSlice";
 import { Status } from "../../globals/types/type";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { AxiosError } from "axios";
 
 const Register = () => {
   const dispatch = useAppDispatch();
@@ -17,6 +18,7 @@ const Register = () => {
 
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [emailExists, setEmailExists] = useState(false); // Track if the email exists
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -37,18 +39,57 @@ const Register = () => {
     }
   }, [registerStatus, navigate]);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true); // Show loading state
     setError(null); // Reset previous error
 
+    // Frontend Validation
     if (!data.username || !data.email || !data.password) {
       setError("All fields are required.");
       setIsLoading(false); // Stop loading on validation failure
       return;
     }
 
-    dispatch(registerUser(data)); // Dispatch registration action
+    if (data.password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      setIsLoading(false);
+      return;
+    }
+
+    // Check if email exists before submitting
+    if (emailExists) {
+      setError(
+        "This email is already registered. Please try a different email."
+      );
+      setIsLoading(false);
+      return;
+    }
+
+    // Dispatch registration action
+    try {
+      await dispatch(registerUser(data)); // Assuming registerUser returns a promise
+    } catch (error: unknown) {
+      // Handle error if email already exists (sent from backend)
+      if (error instanceof AxiosError) {
+        if (
+          error.response &&
+          error.response.status === 400 &&
+          error.response.data.message.includes("email")
+        ) {
+          setEmailExists(true); // Email is already taken, update state
+          setError(
+            "This email is already registered. Please try a different email."
+          );
+        } else {
+          setError("Something went wrong! Please try again.");
+        }
+      } else {
+        // If it's not an Axios error, log the error
+        setError("An unknown error occurred.");
+      }
+      setIsLoading(false);
+    }
   };
 
   const isSuccess = registerStatus === Status.SUCCESS;
@@ -214,7 +255,7 @@ const Register = () => {
               </div>
 
               <p className="text-center text-sm text-slate-600">
-                Already have an account?{" "}
+                Already have an account?
                 <Link
                   to="/login"
                   className="font-semibold text-sky-600 hover:text-sky-700"

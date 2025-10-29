@@ -3,14 +3,14 @@ import { Status, type ILogin } from "../../globals/types/type";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { loginUser } from "../../store/authSlice";
 import { Link, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast"; // Import react-hot-toast
+import toast from "react-hot-toast";
 
 const Login = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { user, loginStatus, registerStatus } = useAppSelector(
-    (store) => store.auth
-  ); // Use both loginStatus and registerStatus
+  const { user, loginStatus, registerStatus, errorMessage } = useAppSelector(
+    (store) => store.auth // Access the errorMessage from Redux store
+  );
   const [data, setData] = useState<ILogin>({
     email: "",
     password: "",
@@ -32,10 +32,10 @@ const Login = () => {
   // Redirect after successful login or registration
   useEffect(() => {
     if (loginStatus === Status.SUCCESS && user) {
-      toast.success("Login successful!"); // Toast notification on success
+      toast.success("Login successful!");
       navigate("/"); // Navigate to homepage after successful login
     } else if (registerStatus === Status.SUCCESS) {
-      navigate("/login"); // Redirect to login page after successful registration
+      navigate("/login");
     }
   }, [loginStatus, registerStatus, user, navigate]);
 
@@ -93,6 +93,13 @@ const Login = () => {
             </div>
           </div>
 
+          {/* Display error message if password is incorrect */}
+          {errorMessage && (
+            <div className="text-sm text-red-600 mt-2">
+              {errorMessage} {/* Display the error message from Redux */}
+            </div>
+          )}
+
           <div>
             <button
               type="submit"
@@ -110,7 +117,7 @@ const Login = () => {
               Forgot Password?
             </Link>
             <p className="text-sm text-slate-600">
-              Don't have an account?{" "}
+              Don't have an account?
               <Link
                 to="/register"
                 className="font-semibold text-sky-500 hover:text-sky-700"

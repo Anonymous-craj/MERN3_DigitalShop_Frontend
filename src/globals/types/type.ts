@@ -14,6 +14,7 @@ export interface IAuthState {
   registerStatus: Status;
   loginStatus: Status;
   status: Status;
+  errorMessage: string;
 }
 
 export enum Status {

@@ -7,6 +7,7 @@ import {
 } from "../globals/types/type";
 import { type AppDispatch } from "./store";
 import { API, APIWITHTOKEN } from "../http/apiType";
+import { AxiosError } from "axios";
 
 const initialState: IAuthState = {
   user: {
@@ -15,9 +16,10 @@ const initialState: IAuthState = {
     password: null,
     token: null,
   },
-  registerStatus: Status.LOADING, // Separate register status
-  loginStatus: Status.LOADING, // Separate login status
+  registerStatus: Status.LOADING,
+  loginStatus: Status.LOADING,
   status: Status.LOADING,
+  errorMessage: "", // Add errorMessage to state
 };
 
 const authSlice = createSlice({
@@ -30,12 +32,14 @@ const authSlice = createSlice({
     setRegisterStatus(state: IAuthState, action: PayloadAction<Status>) {
       state.registerStatus = action.payload;
     },
-
     setLoginStatus(state: IAuthState, action: PayloadAction<Status>) {
       state.loginStatus = action.payload;
     },
     setToken(state: IAuthState, action: PayloadAction<string>) {
       state.user.token = action.payload;
+    },
+    setLoginErrorMessage(state: IAuthState, action: PayloadAction<string>) {
+      state.errorMessage = action.payload; // Store the error message in the state
     },
     resetUser(state: IAuthState) {
       state.user = {
@@ -54,8 +58,10 @@ export const {
   setRegisterStatus,
   setLoginStatus,
   setToken,
+  setLoginErrorMessage,
   resetUser,
 } = authSlice.actions;
+
 export default authSlice.reducer;
 
 export function registerUser(data: IUser) {
@@ -81,6 +87,7 @@ export function loginUser(data: ILogin) {
     try {
       const response = await APIWITHTOKEN.post("/login", data);
       console.log(response);
+
       if (response.status === 200) {
         dispatch(setLoginStatus(Status.SUCCESS)); // Set login status to success
         if (response.data.token) {
@@ -92,7 +99,25 @@ export function loginUser(data: ILogin) {
       }
     } catch (error) {
       console.log(error);
-      dispatch(setLoginStatus(Status.ERROR)); // Handle error case
+
+      // Type the error as AxiosError
+      if (error instanceof AxiosError) {
+        if (error.response) {
+          // Dispatch error status and the error message from the backend
+          dispatch(setLoginStatus(Status.ERROR));
+          dispatch(setLoginErrorMessage(error.response.data.message)); // Dispatch the error message
+        } else {
+          // Handle other types of Axios errors (e.g., network issues)
+          dispatch(setLoginStatus(Status.ERROR));
+          dispatch(setLoginErrorMessage("Network error, please try again.")); // Handle network error
+        }
+      } else {
+        // Handle non-Axios errors
+        dispatch(setLoginStatus(Status.ERROR));
+        dispatch(
+          setLoginErrorMessage("An unknown error occurred. Please try again.")
+        );
+      }
     }
   };
 }
