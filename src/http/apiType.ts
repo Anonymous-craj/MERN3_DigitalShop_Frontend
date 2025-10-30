@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:3000/api",
+  baseURL: "https://mern3-digitalshop-server-1.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -9,7 +9,7 @@ const API = axios.create({
 });
 
 const APIWITHTOKEN = axios.create({
-  baseURL: "http://localhost:3000/api",
+  baseURL: "https://mern3-digitalshop-server-1.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
