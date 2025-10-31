@@ -6,7 +6,8 @@ const SOCKET_URL =
 export const socket = io(SOCKET_URL, {
   autoConnect: false,
   transports: ["websocket", "polling"], // safer on Render
-  withCredentials: false, // you're using Bearer token, not cookies
+  withCredentials: false,
+  path: "/socket.io", // you're using Bearer token, not cookies
 });
 
 export function connectSocketWithToken(token: string | null) {
