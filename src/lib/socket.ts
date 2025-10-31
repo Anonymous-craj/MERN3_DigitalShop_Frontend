@@ -1,10 +1,13 @@
 import { io } from "socket.io-client";
 
-export const socket = io(
-  import.meta.env.VITE_SOCKET_URL ??
-    "https://mern3-digitalshop-server-1.onrender.com",
-  { autoConnect: false }
-);
+const SOCKET_URL =
+  (import.meta.env.VITE_SOCKET_URL as string) ?? "http://localhost:3000";
+
+export const socket = io(SOCKET_URL, {
+  autoConnect: false,
+  transports: ["websocket", "polling"], // safer on Render
+  withCredentials: false, // you're using Bearer token, not cookies
+});
 
 export function connectSocketWithToken(token: string | null) {
   socket.auth = token ? { token } : {};

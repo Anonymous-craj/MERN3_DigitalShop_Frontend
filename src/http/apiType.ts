@@ -1,20 +1,34 @@
 import axios from "axios";
 
-const API = axios.create({
-  baseURL: "https://mern3-digitalshop-server-1.onrender.com/api",
+// Pick API base from env
+const BASE_URL = import.meta.env.VITE_API_URL as string;
+
+// Plain instance (no token)
+export const API = axios.create({
+  baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
 });
 
-const APIWITHTOKEN = axios.create({
-  baseURL: "https://mern3-digitalshop-server-1.onrender.com/api",
+// Authenticated instance
+export const APIWITHTOKEN = axios.create({
+  baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
-    Authorization: localStorage.getItem("token"),
   },
 });
 
-export { API, APIWITHTOKEN };
+// Always attach the latest token
+APIWITHTOKEN.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    // IMPORTANT: Bearer prefix
+    config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    delete config.headers.Authorization;
+  }
+  return config;
+});
